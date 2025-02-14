@@ -1,1 +1,1 @@
-web: gunicorn analize_previsao_BTC:app
+web: python analize_previsao_BTC.py
