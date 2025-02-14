@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previsão do Bitcoin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <style>
+        body {
+            background-color: #343a40;
+            font-family: 'Arial', sans-serif;
+            color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: #495057;
+        }
+        .card-header {
+            background-color: #212529;
+            color: #f8f9fa;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .compra {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .venda {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        canvas {
+            background-color: #495057;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header text-center">
+            <i class="fas fa-chart-line"></i> Previsão do Bitcoin
+        </div>
+        <div class="card-body text-center">
+            <h3>Última Previsão</h3>
+            <p class="price" id="previsao"></p>
+
+            <h3>Recomendação</h3>
+            <p id="recomendacao"></p>
+
+            <canvas id="graficoBitcoin"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function carregarPrevisao() {
+        const response = await fetch("/previsao");
+        const data = await response.json();
+        
+        document.getElementById("previsao").innerHTML = 
+            `Preço anterior: <span class="text-secondary">$${data.preco_anterior}</span> | 
+            Preço previsto: <span class="text-primary">$${data.preco_previsto}</span>`;
+
+        const recomendacao = document.getElementById("recomendacao");
+        recomendacao.innerText = `Recomendação: ${data.recomendacao}`;
+        recomendacao.classList.add(data.recomendacao === "COMPRA" ? "compra" : "venda");
+
+        desenharGrafico(data.preco_anterior, data.preco_previsto);
+    }
+
+    function desenharGrafico(preco_anterior, preco_previsto) {
+        const ctx = document.getElementById("graficoBitcoin").getContext("2d");
+
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Preço Anterior", "Preço Previsto"],
+                datasets: [{
+                    label: "Bitcoin (USD)",
+                    data: [preco_anterior, preco_previsto],
+                    backgroundColor: "rgba(40, 167, 69, 0.2)",  // Verde claro
+                    borderColor: "rgba(40, 167, 69, 1)",  // Verde claro
+                    borderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: "#f8f9fa"
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: "#f8f9fa"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    carregarPrevisao();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
